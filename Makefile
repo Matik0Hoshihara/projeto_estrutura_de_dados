@@ -1,7 +1,7 @@
 CC = gcc
-CFLAGS = -Wall -Wextra -std=c99 -Iinclude
+CFLAGS = -Wall -Wextra -std=c11 -Iinclude
 
-SRC = src/main.c src/bst.c src/grafo.c src/lista.c src/pilha.c src/fila.c src/ordenacao.c
+SRC = src/main.c src/bst.c src/pilha.c
 OBJ = $(SRC:.c=.o)
 EXEC = programa
 
