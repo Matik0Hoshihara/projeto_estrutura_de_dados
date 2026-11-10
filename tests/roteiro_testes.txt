@@ -1,0 +1,43 @@
+======================================================================
+ROTEIRO DE TESTES REPRODUZÍVEIS - PROJETO ESTRUTURA DE DADOS
+======================================================================
+
+1. INSERÇÃO E VALIDAÇÃO NA BST )
+   - Teste 1.1: Cadastrar Livro Válido (ID: 10, Título: "Estrutura de Dados", Autor: "Tenenbaum", Ano: 2020)
+     -> Resultado Esperado: Livro cadastrado com sucesso.
+     -> Resultado Obtido: Mensagem de confirmação exibida.
+   - Teste 1.2: Tentar Cadastrar ID Duplicado (ID: 10)
+     -> Resultado Esperado: Rejeição informando duplicidade.
+     -> Resultado Obtido: "Erro: Ja existe um livro cadastrado com o ID 10!".
+   - Teste 1.3: Tentar Cadastrar Ano Inválido (Ano: 2030 ou 0)
+     -> Resultado Esperado: Rejeição por estar fora do intervalo (1 a 2026).
+     -> Resultado Obtido: "Ano invalido! Deve ser um ano de 1 a 2026.".
+   - Teste 1.4: Tentar Cadastrar Texto Vazio ou Apenas com Espaços
+     -> Resultado Esperado: Rejeição da entrada textual.
+     -> Resultado Obtido: "Titulo invalido! Nao pode ser vazio ou exceder 79 caracteres.".
+
+2. REMOÇÃO DE NÓS NA BST
+   - Teste 2.1: Remover Nó Folha (0 Filhos)
+     -> Cadastrar ID 5 (filho de 10) e solicitar remoção do ID 5.
+     -> Resultado Esperado: Nó removido e ponteiro do pai ajustado para NULL.
+   - Teste 2.2: Remover Nó com 1 Filho
+     -> Cadastrar ID 15 e ID 20. Remover ID 15.
+     -> Resultado Esperado: Nó 15 removido e ID 20 ligado diretamente ao pai.
+   - Teste 2.3: Remover Nó com 2 Filhos
+     -> Remover a raiz ou nó com subárvores esquerda e direita.
+     -> Resultado Esperado: Substituição pelo menor nó da subárvore direita e remoção correta.
+
+3. ESTRUTURA LINEAR - PILHA 
+   - Teste 3.1: Inserir IDs na Pilha (Push)
+     -> Inserir IDs 101, 102, 103.
+     -> Resultado Esperado: IDs empilhados com sucesso.
+   - Teste 3.2: Remover ID da Pilha (Pop)
+     -> Solicitar remoção.
+     -> Resultado Esperado: Remove o ID 103 (topo da pilha).
+   - Teste 3.3: Remover de Pilha Vazia
+     -> Desempilhar até esvaziar e solicitar remoção extra.
+     -> Resultado Esperado: "Estrutura linear vazia! Nenhum elemento para remover.".
+
+4. ENCERRAMENTO E MEMÓRIA 
+   - Selecionar Opção 0 no Menu.
+   - Resultado Esperado: Execução de liberarBST() e liberarPilha(), finalizando sem vazamentos de memória.
