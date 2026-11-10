@@ -1,43 +1,74 @@
-======================================================================
-ROTEIRO DE TESTES REPRODUZÍVEIS - PROJETO ESTRUTURA DE DADOS
-======================================================================
+====================================================================
+ROTEIRO DE TESTES REPRODUZÍVEIS - ESTRUTURA DE DADOS 
+Tema: Biblioteca (BST + Pilha Dinâmica)
+====================================================================
 
-1. INSERÇÃO E VALIDAÇÃO NA BST )
-   - Teste 1.1: Cadastrar Livro Válido (ID: 10, Título: "Estrutura de Dados", Autor: "Tenenbaum", Ano: 2020)
-     -> Resultado Esperado: Livro cadastrado com sucesso.
-     -> Resultado Obtido: Mensagem de confirmação exibida.
-   - Teste 1.2: Tentar Cadastrar ID Duplicado (ID: 10)
-     -> Resultado Esperado: Rejeição informando duplicidade.
-     -> Resultado Obtido: "Erro: Ja existe um livro cadastrado com o ID 10!".
-   - Teste 1.3: Tentar Cadastrar Ano Inválido (Ano: 2030 ou 0)
-     -> Resultado Esperado: Rejeição por estar fora do intervalo (1 a 2026).
-     -> Resultado Obtido: "Ano invalido! Deve ser um ano de 1 a 2026.".
-   - Teste 1.4: Tentar Cadastrar Texto Vazio ou Apenas com Espaços
-     -> Resultado Esperado: Rejeição da entrada textual.
-     -> Resultado Obtido: "Titulo invalido! Nao pode ser vazio ou exceder 79 caracteres.".
+--- TESTE 01: CADASTRO NA BST (OPÇÃO 1) ---
+Passos:
+1. Escolher opção 1 no menu.
+2. Inserir ID: 5 | Título: Dom Casmurro | Autor: Machado de Assis | Ano: 5
+3. Tentar cadastrar ID 5 novamente (Teste de ID duplicado).
+4. Inserir ID: 10 | Título: O Cortico | Autor: Aluisio Azevedo | Ano: 1890
+5. Inserir ID: 2 | Título: Memorias Postumas | Autor: Machado de Assis | Ano: 1881
 
-2. REMOÇÃO DE NÓS NA BST
-   - Teste 2.1: Remover Nó Folha (0 Filhos)
-     -> Cadastrar ID 5 (filho de 10) e solicitar remoção do ID 5.
-     -> Resultado Esperado: Nó removido e ponteiro do pai ajustado para NULL.
-   - Teste 2.2: Remover Nó com 1 Filho
-     -> Cadastrar ID 15 e ID 20. Remover ID 15.
-     -> Resultado Esperado: Nó 15 removido e ID 20 ligado diretamente ao pai.
-   - Teste 2.3: Remover Nó com 2 Filhos
-     -> Remover a raiz ou nó com subárvores esquerda e direita.
-     -> Resultado Esperado: Substituição pelo menor nó da subárvore direita e remoção correta.
+Resultado Esperado:
+- Ano 5 aceito com sucesso (faixa 1 a 2026).
+- Rejeição do ID 5 duplicado com mensagem de erro.
+- Inserção com sucesso dos IDs 5, 10 e 2.
+Resultado Obtido: CONFORME ESPERADO.
 
-3. ESTRUTURA LINEAR - PILHA 
-   - Teste 3.1: Inserir IDs na Pilha (Push)
-     -> Inserir IDs 101, 102, 103.
-     -> Resultado Esperado: IDs empilhados com sucesso.
-   - Teste 3.2: Remover ID da Pilha (Pop)
-     -> Solicitar remoção.
-     -> Resultado Esperado: Remove o ID 103 (topo da pilha).
-   - Teste 3.3: Remover de Pilha Vazia
-     -> Desempilhar até esvaziar e solicitar remoção extra.
-     -> Resultado Esperado: "Estrutura linear vazia! Nenhum elemento para remover.".
+--- TESTE 02: BUSCA POR ID NA BST (OPÇÃO 2) ---
+Passos:
+1. Escolher opção 2 no menu.
+2. Buscar ID existente: 5
+3. Buscar ID inexistente: 99
 
-4. ENCERRAMENTO E MEMÓRIA 
-   - Selecionar Opção 0 no Menu.
-   - Resultado Esperado: Execução de liberarBST() e liberarPilha(), finalizando sem vazamentos de memória.
+Resultado Esperado:
+- ID 5: Retornar dados do livro 'Dom Casmurro'.
+- ID 99: Informar que o registro não foi encontrado.
+Resultado Obtido: CONFORME ESPERADO.
+
+--- TESTE 03: LISTAGEM EM-ORDEM (OPÇÃO 4) ---
+Passos:
+1. Escolher opção 4 no menu.
+
+Resultado Esperado:
+- Exibir os livros cadastrados em ordem crescente de ID: 2, 5 e 10.
+Resultado Obtido: CONFORME ESPERADO.
+
+--- TESTE 04: REMOÇÃO NA BST (OPÇÃO 3) ---
+Passos:
+1. Escolher opção 3 no menu.
+2. Remover ID existente: 2
+3. Listar em-ordem (opção 4) para verificar remoção.
+4. Tentar remover ID inexistente: 99
+
+Resultado Esperado:
+- Mensagem de sucesso ao remover ID 2.
+- ID 2 não aparece mais na listagem em-ordem.
+- Alerta ao tentar remover ID 99 inexistente sem travar o programa.
+Resultado Obtido: CONFORME ESPERADO.
+
+--- TESTE 05: ESTRUTURA LINEAR PILHA (OPÇÕES 5, 6 E 7) ---
+Passos:
+1. Escolher opção 5 e empilhar ID: 100
+2. Escolher opção 5 e empilhar ID: 5 (permite repetição/não vinculado à BST).
+3. Escolher opção 7 para exibir a pilha.
+4. Escolher opção 6 para desempilhar (remove o topo).
+5. Escolher opção 6 novamente (desempilhar ID 100).
+6. Escolher opção 6 com a pilha vazia (Teste de estrutura vazia).
+
+Resultado Esperado:
+- Exibição da pilha: Topo -> [ID: 5] [ID: 100] -> Base.
+- Desempilhar remove primeiro o ID 5 (LIFO).
+- Remoção em pilha vazia exibe aviso sem fechar o sistema.
+Resultado Obtido: CONFORME ESPERADO.
+
+--- TESTE 06: ENCERRAMENTO DO PROGRAMA (OPÇÃO 0) ---
+Passos:
+1. Escolher opção 0 no menu.
+
+Resultado Esperado:
+- Mensagem de encerramento, liberação da memória da BST e da Pilha e encerramento limpo.
+Resultado Obtido: CONFORME ESPERADO.
+====================================================================

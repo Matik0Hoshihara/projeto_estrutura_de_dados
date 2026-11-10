@@ -1,83 +1,56 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "pilha.h"
+#include "../include/pilha.h"
 
-
-void iniciarPilha(Pilha *p) {
-    p->topo = NULL;
+Pilha criarPilha(void) {
+    Pilha p;
+    p.topo = NULL;
+    return p;
 }
 
-// empilha uma acao concluida
-void push(Pilha *p, AcaoHistorico acao) {
-    NoPilha *novo = (NoPilha *) malloc(sizeof(NoPilha));
+void empilhar(Pilha *p, int id) {
+    NoPilha *novo = (NoPilha*) malloc(sizeof(NoPilha));
     if (novo == NULL) {
-        printf("Erro ao alocar memoria para a pilha.\n");
+        printf("[ERRO] Falha ao alocar memoria para a pilha.\n");
         return;
     }
-
-    novo->dado = acao;
-    novo->prox = p->topo;
+    novo->id = id;
+    novo->proximo = p->topo;
     p->topo = novo;
+    printf("[SUCESSO] ID %d inserido na estrutura linear (Pilha).\n", id);
 }
 
-// desempilha a acao do topo
-int pop(Pilha *p, AcaoHistorico *saida) {
+int desempilhar(Pilha *p, int *idRemovido) {
     if (p->topo == NULL) {
-        return 0; 
+        return 0; // Pilha vazia
     }
-
     NoPilha *temp = p->topo;
-    *saida = temp->dado;
-    p->topo = p->topo->prox;
-
+    *idRemovido = temp->id;
+    p->topo = temp->proximo;
     free(temp);
-    return 1; 
-}
-
-// consulta a acao do topo sem remover 
-int peek(Pilha *p, AcaoHistorico *saida) {
-    if (p->topo == NULL) {
-        return 0;
-    }
-    *saida = p->topo->dado;
     return 1;
 }
 
-// exibe ate as ultimas 5 acoes da pilha 
-void exibirHistorico(Pilha *p) {
+void exibirPilha(const Pilha *p) {
     if (p->topo == NULL) {
-        printf("Historico de alteracoes vazio.\n");
+        printf("A estrutura linear (Pilha) esta vazia.\n");
         return;
     }
-
-    printf("\n--- HISTORICO DE ALTERACOES (Ultimas 5) ---\n");
+    printf("Topo -> ");
     NoPilha *atual = p->topo;
-    int contador = 0;
-
-    while (atual != NULL && contador < 5) {
-        printf("%d. ", contador + 1);
-        switch (atual->dado.tipo) {
-            case CADASTRO:
-                printf("[CADASTRO] Livro ID: %d\n", atual->dado.id1);
-                break;
-            case REMOCAO:
-                printf("[REMOCAO] Livro ID: %d\n", atual->dado.id1);
-                break;
-            case ADD_CONEXAO:
-                printf("[CONEXAO ADICIONADA] Entre ID %d e ID %d\n", atual->dado.id1, atual->dado.id2);
-                break;
-            case REM_CONEXAO:
-                printf("[CONEXAO REMOVIDA] Entre ID %d e ID %d\n", atual->dado.id1, atual->dado.id2);
-                break;
-        }
-        atual = atual->prox;
-        contador++;
+    while (atual != NULL) {
+        printf("[ID: %d] ", atual->id);
+        atual = atual->proximo;
     }
-    printf("-------------------------------------------\n");
+    printf("-> Base\n");
 }
 
-// libera toda a pilha da memoria
 void liberarPilha(Pilha *p) {
-    AcaoHistorico temp;
-    while (pop(p, &temp));
+    NoPilha *atual = p->topo;
+    while (atual != NULL) {
+        NoPilha *temp = atual;
+        atual = atual->proximo;
+        free(temp);
+    }
+    p->topo = NULL;
 }

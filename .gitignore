@@ -1,4 +1,14 @@
-*.o
+# Executaveis e binarios
 *.exe
-programa
+*.out
+*.o
+programa.exe
+
+# Pastas de compilacao temporarias
+src/output/
+output/
 .vscode/
+
+# Arquivos de sistema
+Thumbs.db
+Desktop.ini

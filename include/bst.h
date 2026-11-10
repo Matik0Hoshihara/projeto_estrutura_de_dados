@@ -3,20 +3,17 @@
 
 #include "livro.h"
 
-// BST
 typedef struct NoBST {
-    Livro dado;
-    struct NoBST *esq;
-    struct NoBST *dir;
+    Livro dados;
+    struct NoBST *esquerda;
+    struct NoBST *direita;
 } NoBST;
 
-// funcoes BST
-NoBST* inserirBST(NoBST *raiz, Livro livro, int *sucesso);
-NoBST* buscarBST(NoBST *raiz, int id);
-NoBST* removerBST(NoBST *raiz, int id, int *sucesso);
-void emOrdemBST(NoBST *raiz);
-NoBST* buscarMenorID(NoBST *raiz);
-NoBST* buscarMaiorID(NoBST *raiz);
+NoBST* criarNoBST(Livro livro);
+NoBST* inserirLivro(NoBST *raiz, Livro livro);
+NoBST* buscarLivro(NoBST *raiz, int id);
+NoBST* removerLivro(NoBST *raiz, int id);
+void exibirEmOrdem(NoBST *raiz);
 void liberarBST(NoBST *raiz);
 
 #endif

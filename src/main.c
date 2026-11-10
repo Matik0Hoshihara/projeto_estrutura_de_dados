@@ -2,232 +2,279 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
-#include "livro.h"
-#include "bst.h"
-#include "pilha.h"
+#include "../include/livro.h"
+#include "../include/bst.h"
+#include "../include/pilha.h"
 
-//caso a linha exceda o tamanho
+// Limpa o buffer de entrada caso a linha exceda o tamanho maximo
 void limparBuffer() {
     int c;
     while ((c = getchar()) != '\n' && c != EOF);
 }
 
-//valida se nao eh vazia ou apenas espacos 
-int lerStringValida(char *destino, int tamanhoMax) {
-    char buffer[256];
+// Leitura de inteiro isolada, imune a quebras de linha acumuladas no buffer
+int lerInteiroValido(int *val) {
+    char buffer[128];
     if (fgets(buffer, sizeof(buffer), stdin) == NULL) return 0;
 
-    //emove o \n do final
     size_t len = strlen(buffer);
     if (len > 0 && buffer[len - 1] == '\n') {
         buffer[len - 1] = '\0';
-    } else if (len >= sizeof(buffer) - 1) {
-        limparBuffer();
     }
 
-    //valida se nao eh apenas espacos em branco ou vazia
-    int possuiCaractereValido = 0;
-    for (int i = 0; buffer[i] != '\0'; i++) {
-        if (!isspace((unsigned char)buffer[i])) {
-            possuiCaractereValido = 1;
-            break;
-        }
+    char *endptr;
+    long v = strtol(buffer, &endptr, 10);
+
+    // Ignora espacos no final
+    while (*endptr != '\0' && isspace((unsigned char)*endptr)) {
+        endptr++;
     }
 
-    if (!possuiCaractereValido || strlen(buffer) > (size_t)(tamanhoMax - 1)) {
+    // Valida se nao contem letras ou valor invalido
+    if (endptr == buffer || *endptr != '\0' || v <= 0) {
         return 0;
     }
 
-    strcpy(destino, buffer);
+    *val = (int)v;
     return 1;
 }
 
-//validacao de inteiro positivo
-int lerIntPositivo(int *valor) {
-    char buffer[100];
-    if (fgets(buffer, sizeof(buffer), stdin) == NULL) return 0;
+// Garante max 79 caracteres e proibe strings vazias
+int lerStringValida(const char *rotulo, char *destino, int tamanhoMax) {
+    char buffer[256];
+    while (1) {
+        printf("%s", rotulo);
+        fflush(stdout);
+        if (fgets(buffer, sizeof(buffer), stdin) != NULL) {
+            size_t len = strlen(buffer);
+            if (len > 0 && buffer[len - 1] == '\n') {
+                buffer[len - 1] = '\0';
+            } else {
+                limparBuffer();
+            }
 
-    char *endptr;
-    long num = strtol(buffer, &endptr, 10);
+            // Remove espacos nas extremidades para validar
+            char *inicio = buffer;
+            while (isspace((unsigned char)*inicio)) inicio++;
 
-    //ignora espacos e \n no fim do numero
-    while (isspace((unsigned char)*endptr)) endptr++;
+            if (*inicio == '\0') {
+                printf("[ERRO] Texto invalido! Nao pode ser vazio ou conter apenas espacos.\n");
+                fflush(stdout);
+                continue;
+            }
 
-    if (*endptr != '\0' || num <= 0 || num > 2147483647) {
-        return 0; //valor invalido
+            if (strlen(inicio) >= (size_t)tamanhoMax) {
+                printf("[ERRO] Texto muito longo! Limite maximo de %d caracteres.\n", tamanhoMax - 1);
+                fflush(stdout);
+                continue;
+            }
+
+            strncpy(destino, inicio, tamanhoMax - 1);
+            destino[tamanhoMax - 1] = '\0';
+            return 1;
+        }
+    }
+}
+
+// Cadastrar registro na BST
+void opcaoCadastrarBST(NoBST **raiz) {
+    int id = 0, ano = 0;
+    char titulo[80], autor[80];
+
+    printf("\n--- CADASTRAR REGISTRO NA BST ---\n");
+    fflush(stdout);
+
+    // Validacao do ID
+    while (1) {
+        printf("Digite o ID (inteiro positivo unico): ");
+        fflush(stdout);
+        if (lerInteiroValido(&id)) {
+            if (buscarLivro(*raiz, id) != NULL) {
+                printf("[ERRO] ID %d ja cadastrado na BST. Digite um ID unico.\n", id);
+                fflush(stdout);
+            } else {
+                break; // ID valido e unico!
+            }
+        } else {
+            printf("[ERRO] ID invalido! Digite apenas numeros inteiros maiores que 0.\n");
+            fflush(stdout);
+        }
     }
 
-    *valor = (int)num;
-    return 1;
+    // Validacao do Titulo e Autor
+    lerStringValida("Digite o Titulo (max 79 chars): ", titulo, sizeof(titulo));
+    lerStringValida("Digite o Autor (max 79 chars): ", autor, sizeof(autor));
+
+    // Validacao do Ano
+    while (1) {
+        printf("Digite o Ano de Publicacao (1 a 2026): ");
+        fflush(stdout);
+        if (lerInteiroValido(&ano) && ano >= 1 && ano <= 2026) {
+            break; // Ano aceito!
+        }
+        printf("[ERRO] Ano invalido! Digite um numero inteiro entre 1 e 2026.\n");
+        fflush(stdout);
+    }
+
+    // Insercao na BST
+    Livro novo = criarLivro(id, titulo, autor, ano);
+    *raiz = inserirLivro(*raiz, novo);
+
+    printf("\n[SUCESSO] Livro '%s' (ID: %d, Ano: %d) cadastrado com sucesso na BST!\n", titulo, id, ano);
+    fflush(stdout);
+}
+
+// Buscar registro por ID na BST
+void opcaoBuscarBST(NoBST *raiz) {
+    int id = 0;
+    printf("\n--- BUSCAR REGISTRO POR ID NA BST ---\n");
+    fflush(stdout);
+
+    while (1) {
+        printf("Digite o ID para busca: ");
+        fflush(stdout);
+        if (lerInteiroValido(&id)) break;
+        printf("[ERRO] ID invalido! Digite um inteiro positivo.\n");
+        fflush(stdout);
+    }
+
+    NoBST *res = buscarLivro(raiz, id);
+    if (res != NULL) {
+        printf("\n[REGISTRO ENCONTRADO]\n");
+        printf("ID: %d | Titulo: %s | Autor: %s | Ano: %d\n",
+               res->dados.id, res->dados.titulo, res->dados.autor, res->dados.ano);
+    } else {
+        printf("\n[AVISO] ID %d nao encontrado na BST.\n", id);
+    }
+    fflush(stdout);
+}
+
+// Remover registro da BST
+void opcaoRemoverBST(NoBST **raiz) {
+    int id = 0;
+    printf("\n--- REMOVER REGISTRO DA BST ---\n");
+    fflush(stdout);
+
+    while (1) {
+        printf("Digite o ID para remover: ");
+        fflush(stdout);
+        if (lerInteiroValido(&id)) break;
+        printf("[ERRO] ID invalido! Digite um inteiro positivo.\n");
+        fflush(stdout);
+    }
+
+    if (buscarLivro(*raiz, id) == NULL) {
+        printf("\n[ERRO] Nao foi possivel remover: ID %d nao existe na BST.\n", id);
+        fflush(stdout);
+        return;
+    }
+
+    *raiz = removerLivro(*raiz, id);
+    printf("\n[SUCESSO] Registro ID %d removido da BST com sucesso!\n", id);
+    fflush(stdout);
+}
+
+// Inserir ID na estrutura linear (Pilha)
+void opcaoInserirPilha(Pilha *p) {
+    int id = 0;
+    printf("\n--- INSERIR ID NA ESTRUTURA LINEAR (PILHA) ---\n");
+    fflush(stdout);
+
+    while (1) {
+        printf("Digite o ID para inserir na pilha (inteiro positivo): ");
+        fflush(stdout);
+        if (lerInteiroValido(&id)) break;
+        printf("[ERRO] ID invalido! Digite apenas numeros inteiros positivos maiores que 0.\n");
+        fflush(stdout);
+    }
+    empilhar(p, id);
+    fflush(stdout);
+}
+
+// Remover da estrutura linear (Pilha)
+void opcaoRemoverPilha(Pilha *p) {
+    int idRemovido;
+    printf("\n--- REMOVER DA ESTRUTURA LINEAR (PILHA) ---\n");
+    fflush(stdout);
+
+    if (desempilhar(p, &idRemovido)) {
+        printf("[SUCESSO] ID %d removido do topo da pilha!\n", idRemovido);
+    } else {
+        printf("[AVISO] A estrutura linear esta vazia. Nao ha o que remover.\n");
+    }
+    fflush(stdout);
 }
 
 int main() {
-    NoBST *raizBST = NULL;
-    Pilha pilhaLinear;
-    iniciarPilha(&pilhaLinear);
-
+    NoBST *raiz = NULL;
+    Pilha pilha = criarPilha();
     int opcao = -1;
 
     do {
-        printf("\n========================================\n");
-        printf("     SISTEMA DE ESTRUTURA DE DADOS\n");
-        printf("========================================\n");
+        printf("\n=========================================\n");
+        printf("     SISTEMA DE GESTAO DE BIBLIOTECA     \n");
+        printf("=========================================\n");
         printf("1 - Cadastrar registro na BST\n");
         printf("2 - Buscar registro por ID na BST\n");
         printf("3 - Remover registro da BST\n");
         printf("4 - Listar registros em-ordem\n");
-        printf("5 - Inserir ID na estrutura linear (Pilha)\n");
-        printf("6 - Remover da estrutura linear (Pilha)\n");
-        printf("7 - Exibir estrutura linear (Pilha)\n");
+        printf("5 - Inserir ID na estrutura linear\n");
+        printf("6 - Remover da estrutura linear\n");
+        printf("7 - Exibir estrutura linear\n");
         printf("0 - Encerrar\n");
-        printf("========================================\n");
+        printf("=========================================\n");
         printf("Escolha uma opcao: ");
+        fflush(stdout);
 
-        if (!lerIntPositivo(&opcao)) {
-            printf("Opcao invalida! Digite um numero inteiro do menu.\n");
-            opcao = -1;
-            continue;
+        if (!lerInteiroValido(&opcao) && opcao != 0) {
+            char buf[64];
+            if (fgets(buf, sizeof(buf), stdin) != NULL) {
+                opcao = atoi(buf);
+            }
         }
 
         switch (opcao) {
-            case 1: {
-                Livro novo;
-                printf("\n--- Cadastrar Livro na BST ---\n");
-                printf("Digite o ID (inteiro positivo unico): ");
-                if (!lerIntPositivo(&novo.id)) {
-                    printf("ID invalido! Deve ser um numero inteiro positivo.\n");
-                    break;
-                }
-
-                if (buscarBST(raizBST, novo.id) != NULL) {
-                    printf("Erro: Ja existe um livro cadastrado com o ID %d!\n", novo.id);
-                    break;
-                }
-
-                printf("Digite o Titulo (max 79 chars): ");
-                if (!lerStringValida(novo.titulo, 80)) {
-                    printf("Titulo invalido! Nao pode ser vazio ou exceder 79 caracteres.\n");
-                    break;
-                }
-
-                printf("Digite o Autor (max 79 chars): ");
-                if (!lerStringValida(novo.autor, 80)) {
-                    printf("Autor invalido! Nao pode ser vazio ou exceder 79 caracteres.\n");
-                    break;
-                }
-
-                printf("Digite o Ano de Publicacao (1 a 2026): ");
-                if (!lerIntPositivo(&novo.ano) || novo.ano > 2026) {
-                    printf("Ano invalido! Deve ser um ano de 1 a 2026.\n");
-                    break;
-                }
-
-                int sucesso = 0;
-                raizBST = inserirBST(raizBST, novo, &sucesso);
-                if (sucesso) {
-                    printf("Livro cadastrado com sucesso na BST!\n");
-                }
+            case 1:
+                opcaoCadastrarBST(&raiz);
                 break;
-            }
-
-            case 2: {
-                int idBusca;
-                printf("\n--- Buscar Livro por ID ---\n");
-                printf("Digite o ID para busca: ");
-                if (!lerIntPositivo(&idBusca)) {
-                    printf("ID invalido!\n");
-                    break;
-                }
-
-                NoBST *resultado = buscarBST(raizBST, idBusca);
-                if (resultado != NULL) {
-                    printf("\n[ENCONTRADO] ID: %d | Titulo: %s | Autor: %s | Ano: %d\n",
-                           resultado->dado.id, resultado->dado.titulo, resultado->dado.autor, resultado->dado.ano);
+            case 2:
+                opcaoBuscarBST(raiz);
+                break;
+            case 3:
+                opcaoRemoverBST(&raiz);
+                break;
+            case 4:
+                printf("\n--- LISTAGEM EM-ORDEM (BST) ---\n");
+                if (raiz == NULL) {
+                    printf("A BST esta vazia.\n");
                 } else {
-                    printf("Livro com ID %d nao encontrado na BST.\n", idBusca);
+                    exibirEmOrdem(raiz);
                 }
+                fflush(stdout);
                 break;
-            }
-
-            case 3: {
-                int idRemover;
-                printf("\n--- Remover Livro da BST ---\n");
-                printf("Digite o ID para remover: ");
-                if (!lerIntPositivo(&idRemover)) {
-                    printf("ID invalido!\n");
-                    break;
-                }
-
-                int sucesso = 0;
-                raizBST = removerBST(raizBST, idRemover, &sucesso);
-                if (sucesso) {
-                    printf("Livro ID %d removido com sucesso da BST!\n", idRemover);
-                } else {
-                    printf("Erro: Livro ID %d nao existe na BST.\n", idRemover);
-                }
+            case 5:
+                opcaoInserirPilha(&pilha);
                 break;
-            }
-
-            case 4: {
-                printf("\n--- Listagem Em-Ordem (BST) ---\n");
-                if (raizBST == NULL) {
-                    printf("BST vazia.\n");
-                } else {
-                    emOrdemBST(raizBST);
-                }
+            case 6:
+                opcaoRemoverPilha(&pilha);
                 break;
-            }
-
-            case 5: {
-                int idLinear;
-                printf("\n--- Inserir ID na Estrutura Linear (Pilha) ---\n");
-                printf("Digite o ID (inteiro positivo): ");
-                if (!lerIntPositivo(&idLinear)) {
-                    printf("ID invalido!\n");
-                    break;
-                }
-
-                AcaoHistorico acao;
-                acao.tipo = CADASTRO;
-                acao.id1 = idLinear;
-                acao.id2 = 0;
-
-                push(&pilhaLinear, acao);
-                printf("ID %d inserido na Pilha com sucesso!\n", idLinear);
+            case 7:
+                printf("\n--- ESTRUTURA LINEAR (PILHA) ---\n");
+                exibirPilha(&pilha);
+                fflush(stdout);
                 break;
-            }
-
-            case 6: {
-                printf("\n--- Remover da Estrutura Linear (Pilha) ---\n");
-                AcaoHistorico rem;
-                if (pop(&pilhaLinear, &rem)) {
-                    printf("ID %d removido do topo da Pilha com sucesso!\n", rem.id1);
-                } else {
-                    printf("Estrutura linear vazia! Nenhum elemento para remover.\n");
-                }
-                break;
-            }
-
-            case 7: {
-                printf("\n--- Exibir Estrutura Linear (Pilha) ---\n");
-                exibirHistorico(&pilhaLinear);
-                break;
-            }
-
             case 0:
                 printf("\nEncerrando o programa e liberando memoria...\n");
+                liberarBST(raiz);
+                liberarPilha(&pilha);
+                printf("Memoria liberada com sucesso. Programa encerrado!\n");
+                fflush(stdout);
                 break;
-
             default:
-                printf("Opcao invalida!\n");
+                printf("\n[ERRO] Opcao invalida! Escolha um numero de 0 a 7.\n");
+                fflush(stdout);
         }
-
     } while (opcao != 0);
 
-    //libera toda a memoria alocada ao encerrar 
-    liberarBST(raizBST);
-    liberarPilha(&pilhaLinear);
-
-    printf("Memoria liberada. Programa finalizado!\n");
     return 0;
 }
