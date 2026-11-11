@@ -212,7 +212,7 @@ int main() {
 
     do {
         printf("\n=========================================\n");
-        printf("     SISTEMA DE GESTAO DE BIBLIOTECA     \n");
+        printf("     SISTEMA DE ESTRUTURA DE DADOS     \n");
         printf("=========================================\n");
         printf("1 - Cadastrar registro na BST\n");
         printf("2 - Buscar registro por ID na BST\n");
